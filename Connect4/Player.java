@@ -3,7 +3,7 @@ package Connect4;
 import java.util.Scanner;
 
 public class Player {
-  private String name;
+  public String name;
   private char symbol;
   private Grid board;
 
@@ -21,18 +21,16 @@ public class Player {
     return name + " (" + symbol + ")";
   }
 
-  public void takeTurn(Scanner key) {
-    System.out.printf("Player %s (%c): Please enter column position (1-7) OR S to save game stage/L to load:", this.name, this.symbol);
+  public boolean takeTurn(Scanner key) {
+    System.out.printf("Player %s (%c): Please enter column position (1-7) OR E to exit:", this.name, this.symbol);
     String columnPos = key.nextLine();
 
-    if (columnPos.equals("S")) {
-    	board.saveGameState();
-    }
-    if (columnPos.equals("L")) {
-    	board.loadGameState();
+    if (columnPos.equals("E")) {
+    	return false; //indicate the game should exit
     }
     if (!board.dropDisc(this.symbol,columnPos)) {
-      takeTurn(key);
+      return takeTurn(key);
     }
+    return true; // the game should continue
   }
 }

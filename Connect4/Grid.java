@@ -1,9 +1,5 @@
 package Connect4;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Scanner;
 
 public class Grid {
@@ -138,58 +134,19 @@ public class Grid {
 
 		return result;
 	}
-
-	public void saveGameState() {
-
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter("//Users//sakshijashnani//Desktop//GameState.txt");
-			fw.write(this.toString());
-			System.out.println("Game state saved successfully.");
-		} catch (IOException e) {
-			System.out.println("Error saving game state: " + e.getMessage());
-		} finally {
-			if (fw != null) {
-
-				try {
-					fw.close(); // Close FileWriter, and it might throw IOException
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	//printing it as a string too, do i need to parse it and print as 2D array?
-	public void loadGameState() {
-		FileReader fr = null;
-		Scanner k = null;
-
-		try {
-			fr = new FileReader("//Users//sakshijashnani//Desktop//GameState.txt");
-			k = new Scanner(fr);
-
-			while (k.hasNextLine()) {
-				String line = k.nextLine();
-				System.out.print(line + "\n");
-			}
-			System.out.println("Last saved stage loaded");
-		} catch (FileNotFoundException e) {
-			System.out.println("no saved game stage");
-		} finally {
-
-			if (k != null) {
-				k.close();
-			}
-
-			if (fr != null) {
-
-				try {
-					fr.close(); // Close FileReader, and it might throw IOException
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+	public void loadBoard(Scanner scanner) {
+	      int row = 0;
+	      while (scanner.hasNextLine() && row < board.length) {
+	          String[] data = scanner.nextLine().split("\\|");
+	          
+	          // Iterate over each cell in the line to place discs
+	          for (int col = 1; col < data.length - 1; col++) { // Skip row numbers
+	              String cell = data[col].trim();
+	              if (cell.equals("X") || cell.equals("O")) {
+	                  board[row][col - 1] = new Disc(cell.charAt(0), row, col - 1); // Place disc on the board
+	              }
+	          }
+	          row++;
+	      }
+	  }
 }

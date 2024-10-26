@@ -1,5 +1,11 @@
 package Connect4;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 public class Grid {
 	private Disc[][] board; // 2D array that holds Disc objects
 
@@ -8,9 +14,19 @@ public class Grid {
 		board = new Disc[6][7];
 	}
 
-	public boolean dropDisc(char symbol, int column) {
+	public boolean dropDisc(char symbol, String columnInput) {
 
-		// ensure a valid column input
+		int column;
+
+		// Ensure integer entered without crashing the game
+		try {
+			column = Integer.parseInt(columnInput);
+		} catch (NumberFormatException e) {
+			System.out.println("Please enter a valid column number between 1 and 7.");
+			return false; // Return false if parsing fails
+		}
+
+		// Ensure correct integer entered
 		if (column < 1 || column > 7) {
 			System.out.println("Move not valid, please select a column between 1-7");
 			return false;
@@ -121,5 +137,59 @@ public class Grid {
 		}
 
 		return result;
+	}
+
+	public void saveGameState() {
+
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter("//Users//sakshijashnani//Desktop//GameState.txt");
+			fw.write(this.toString());
+			System.out.println("Game state saved successfully.");
+		} catch (IOException e) {
+			System.out.println("Error saving game state: " + e.getMessage());
+		} finally {
+			if (fw != null) {
+
+				try {
+					fw.close(); // Close FileWriter, and it might throw IOException
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	//printing it as a string too, do i need to parse it and print as 2D array?
+	public void loadGameState() {
+		FileReader fr = null;
+		Scanner k = null;
+
+		try {
+			fr = new FileReader("//Users//sakshijashnani//Desktop//GameState.txt");
+			k = new Scanner(fr);
+
+			while (k.hasNextLine()) {
+				String line = k.nextLine();
+				System.out.print(line + "\n");
+			}
+			System.out.println("Last saved stage loaded");
+		} catch (FileNotFoundException e) {
+			System.out.println("no saved game stage");
+		} finally {
+
+			if (k != null) {
+				k.close();
+			}
+
+			if (fr != null) {
+
+				try {
+					fr.close(); // Close FileReader, and it might throw IOException
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

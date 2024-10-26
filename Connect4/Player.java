@@ -22,12 +22,16 @@ public class Player {
   }
 
   public void takeTurn(Scanner key) {
-    System.out.printf("Player %s (%c): Please enter column position (1-7):", this.name, this.symbol);
-    int columnPos = key.nextInt();
-    key.nextLine();
+    System.out.printf("Player %s (%c): Please enter column position (1-7) OR S to save game stage/L to load:", this.name, this.symbol);
+    String columnPos = key.nextLine();
 
+    if (columnPos.equals("S")) {
+    	board.saveGameState();
+    }
+    if (columnPos.equals("L")) {
+    	board.loadGameState();
+    }
     if (!board.dropDisc(this.symbol,columnPos)) {
-      System.out.println("Invalid move, please try again");
       takeTurn(key);
     }
   }

@@ -1,98 +1,132 @@
 package Connect4;
 
-import java.io.File;
 import java.util.Scanner;
+
+/**
+ * Extension: Save and Load Feature.
+ * 
+ * Players can exit mid-game by entering 'E'. If they choose to save, the
+ * current game state—including player names, symbols, and the board String is
+ * saved to a text file.
+ *
+ * Upon restarting, users can load the saved game or start anew. If loading,
+ * player objects are instantiated from the saved data, and existing discs are
+ * placed on the new board, allowing for continuation.
+ */
 
 public class Connect4 {
 	public static void main(String[] args) {
 		Grid board = new Grid();
 		Scanner key = new Scanner(System.in);
-		Player p1= null, p2=null;
+		Player p1 = null, p2 = null;
 
-		// Load game state at startup
-		System.out.println("Do you want to load a saved game? (yes/no)");
-		String loadGameResponse = key.nextLine();
+		// Prompt the user to decide whether to load a saved game or start a new game.
+		System.out.println("Do you want to load a saved game? (y/n)");
+		String ans = key.nextLine();
+		char loadGameResponse = ans.charAt(0);
 
-		if (loadGameResponse.equalsIgnoreCase("yes")) {
-			File savedGameFile = new File("GameState.csv");
-			if (savedGameFile.exists()) {
-				GameState gameState = new GameState();
-				Player[] players = gameState.loadGameState(board);
+		if (loadGameResponse == 'y') {
+			GameState gameState = new GameState();
+			Player[] players = gameState.loadGameState(board);
+
+			/**
+			 * If user wants to load a saved game, but loading the game state is
+			 * unsuccessful (players are null), prompt the user to input names and symbols
+			 * for a new game.
+			 */
+			if (players[0] == null || players[1] == null) {
+				Player[] newPlayers = createPlayer(key, board);
+				p1 = newPlayers[0];
+				p2 = newPlayers[1];
+			} else {
 				p1 = players[0];
 				p2 = players[1];
 			}
-			else {
-				System.out.println("No saved game state found. Setting up new players.");
-				p1 = createPlayer(key, 'X', board);
-				p2 = createPlayer(key, 'O', board);
-			}
-		} else if (loadGameResponse.equalsIgnoreCase("No")) {
-			p1 = createPlayer(key, 'X', board);
-			p2 = createPlayer(key, 'O', board);
+		} else {// Start a new game if the input is anything other than 'y'.
+			Player[] newPlayers = createPlayer(key, board);
+			p1 = newPlayers[0];
+			p2 = newPlayers[1];
 		}
 
-	// Play the game
-	playGame(key, board, p1, p2);
-	
-    }
-
-	private static Player createPlayer(Scanner key, char symbol, Grid board) {
-		System.out.printf("Player %c: Please enter your name:\n", symbol);
-		String name = key.nextLine();
-		return new Player(name, symbol, board);
-	}
-
-	private static void playGame(Scanner key, Grid board, Player p1, Player p2) {
+		// Main game loop continues until the user chooses to exit or the game ends with
+		// a win or draw.
 		while (true) {
-			// Display the board
+			/*
+			 * Display the current board and allow Player 1 to take their turn. Exit the
+			 * loop if Player 1 chooses to exit (takeTurn method returns false).
+			 */
 			System.out.println(board);
-
-			// Player 1's turn
-			if (!takeTurn(key, board, p1, p2)) {
-				break; // Exit if Player 1 chooses to exit
+			if (!p1.takeTurn(key, p2)) {
+				break;
 			}
-
-			// Check win or draw after Player 1's turn
+			/*
+			 * Check if the current player (p1) has won or if the latest turn resulted in a
+			 * draw.
+			 */
 			if (checkGameEnd(board, p1, p2)) {
 				break;
 			}
 
-			// Player 2's turn
-			System.out.println(board); // Display the board before Player 2's turn
-			if (!takeTurn(key, board, p2, p1)) {
-				break; // Exit if Player 2 chooses to exit
+			// the same checks and actions apply to Player 2.
+			System.out.println(board);
+			if (!p2.takeTurn(key, p1)) {
+				break;
 			}
-
-			// Check win or draw after Player 2's turn
 			if (checkGameEnd(board, p2, p1)) {
 				break;
 			}
 		}
 	}
 
-	private static boolean takeTurn(Scanner key, Grid board, Player currentPlayer, Player opponent) {
-		if (!currentPlayer.takeTurn(key)) {
-			System.out.println("Exiting the game. Do you want to save your game? (yes/no)");
-			if (key.nextLine().equalsIgnoreCase("yes")) {
-				GameState.saveGameState(board, currentPlayer, opponent); // Call save method to save the current game
-																			// state
+	/**
+	 * Asks the users to input their name & symbol (for player 1) and returns
+	 * instantiated Player objects for both users. Validation added - If only name
+	 * is provided, prompts the user to provide both name and symbol.
+	 */
+	private static Player[] createPlayer(Scanner key, Grid board) {
+
+		String userInput = " ";
+
+		while (true) {
+			System.out.println("Player 1: Please enter your name and symbol (X or O)");
+			userInput = key.nextLine();
+			String[] input = userInput.split(" ");
+
+			// Check if input has at least 2 elements
+			if (input.length < 2) {
+				System.out.println("Error: Please provide both your name and symbol.");
+				continue; // Prompt again
 			}
-			return false; // Indicate exit
+			String name = input[0];
+			char symbol = input[1].charAt(0);
+			Player p1 = new Player(name, symbol, board);
+
+			// Assign the leftover symbol to player 2
+			char symbol2 = (symbol == 'X') ? 'O' : 'X';
+
+			// Ask Player 2 to input name and create another player object
+			System.out.printf("Player 2 (%c): Please enter your name\n", symbol2);
+			userInput = key.nextLine();
+			input = userInput.split(" ");
+			String name2 = input[0];
+			Player p2 = new Player(name2, symbol2, board); // create player 2 as per input
+
+			return new Player[] { p1, p2 };
 		}
-		return true; // Indicate continue
 	}
 
+	// Checks if the current player wins or if the grid is full
 	private static boolean checkGameEnd(Grid board, Player currentPlayer, Player opponent) {
 		if (board.checkWin(currentPlayer)) {
 			System.out.printf("Player %s wins the game\n", currentPlayer);
 			System.out.println(board);
-			return true; // Game ends
+			return true; // winner, exit the game
 		}
 		if (board.isGridFull()) {
 			System.out.println("It's a Draw");
 			System.out.println(board);
-			return true; // Game ends
+			return true; // draw, exit the game
 		}
-		return false; // Game continues
+		return false; // game has not ended, continue the game
 	}
 }

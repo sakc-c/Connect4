@@ -153,10 +153,8 @@ public class Grid {
 		for (int row = 0; row < board.length; row++) {
 			result += String.format("%-2d", row + 1);
 			for (int col = 0; col < board[row].length; col++) {
-				/**
-				 * if position not null then place the symbol, if null then place a space
-				 * character to avoid the null pointer exception when printing the board
-				 */
+				// if position not null then place the symbol, if null then place a space
+				// character to avoid the null pointer exception when printing the board
 				String symbol = (board[row][col] != null) ? board[row][col].toString() : " ";
 				result += String.format("| %s ", symbol);
 			}
@@ -167,24 +165,22 @@ public class Grid {
 	}
 
 	/**
-	 * Loads the board state from a string representation saved in a text file.
-	 * Each character represents a disc's symbol (either 'X' or 'O').
-	 * Discs are placed on the board to reconstruct the previous game state, allowing players
-	 * to continue from where they left off.
+	 * Loads the board state from a string representation saved in a text file. Each
+	 * character represents a disc's symbol (either 'X' or 'O'). Discs are placed on
+	 * the board to reconstruct the previous game state, allowing players to
+	 * continue from where they left off.
 	 */
 	public void loadBoard(Scanner scanner) {
 		int row = 0;
 		while (scanner.hasNextLine() && row < board.length) {
-			/**
-			 * Splits the line at each '|' character. Uses "\\|" to treat '|' as a literal
-			 * instead of a special character.
-			 */
+			// Splits the line at each '|' character. Uses "\\|" to treat '|' as a literal
+			// instead of a special character.
 			String[] data = scanner.nextLine().split("\\|");
 
 			// Iterate over each cell in the line to place discs
 			for (int col = 1; col < data.length - 1; col++) { // Start from index 1 to skip row numbers
 				String cell = data[col].trim();
-				if (cell.equals("X") || cell.equals("O")) {
+				if (!cell.isEmpty()) {
 					board[row][col - 1] = new Disc(cell.charAt(0), row, col - 1); // Place disc on the board
 				}
 			}
